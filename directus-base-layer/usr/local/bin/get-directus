@@ -3,10 +3,17 @@ set -e
 
 DIRECTUS_VERSION=$1
 
-rm -rf /var/www/html
-mkdir -p /var/www
+if [ -d /var/www/html ]; then
+  rm -rf /var/www/html
+fi
+mkdir -p /var/www/html
 
 wget -O /tmp/directus_download.tar.gz https://github.com/directus/directus/archive/$DIRECTUS_VERSION.tar.gz
 tar -xf /tmp/directus_download.tar.gz -C /var/www/
-mv /var/www/directus* /var/www/html
+mv /var/www/directus* /var/www/html/cms
+tee /var/www/html/.htaccess <<\EOF
+RewriteEngine on
+RewriteCond %{REQUEST_URI} !^/cms/
+RewriteRule ^(.*)$ /cms/$1 [L]
+EOF
 rm /tmp/directus_download.tar.gz
